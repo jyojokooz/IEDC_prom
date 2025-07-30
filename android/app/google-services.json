@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "738119635362",
+    "project_id": "iedc-rit-ideathon",
+    "storage_bucket": "iedc-rit-ideathon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738119635362:android:a3f977549bb5d7f74b22fb",
+        "android_client_info": {
+          "package_name": "com.example.ideathon_website"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXmxHU8y8g0gKTSCFH2vMKq1ntK2ThAl8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
