@@ -57,8 +57,9 @@ final List<Event> dummyEvents = [
   ),
 ];
 
+// UPDATED: A more robust check for screen size.
 bool isDesktop(BuildContext context) =>
-    MediaQuery.of(context).size.width >= 720;
+    MediaQuery.of(context).size.width >= 850;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -131,45 +132,111 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _scrollToSection(GlobalKey key) {
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(seconds: 1),
-      curve: Curves.easeInOut,
+    // NEW: If on mobile, close the drawer first
+    if (!isDesktop(context)) {
+      Navigator.of(context).pop();
+    }
+    // Use a small delay to allow the drawer to close before scrolling
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Scrollable.ensureVisible(
+        key.currentContext!,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  // NEW: A dedicated builder for the mobile navigation drawer
+  Widget _buildMobileDrawer() {
+    return Drawer(
+      backgroundColor: kBackgroundColor,
+      child: ListView(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F1A3E).withOpacity(0.8),
+            ),
+            child: Center(
+              child: Image.asset('assets/images/iedc_logo.png', height: 60),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            onTap: () => _scrollToSection(_aboutKey),
+          ),
+          ListTile(
+            leading: const Icon(Icons.event),
+            title: const Text('Events'),
+            onTap: () => _scrollToSection(_eventsKey),
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule),
+            title: const Text('Schedule'),
+            onTap: () => _scrollToSection(_scheduleKey),
+          ),
+          ListTile(
+            leading: const Icon(Icons.contact_mail_outlined),
+            title: const Text('Contact'),
+            onTap: () => _scrollToSection(_contactKey),
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GradientButton(
+              text: "Register for Ideathon",
+              onPressed: () => _scrollToSection(_registrationKey),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // NEW: A dedicated builder for the responsive AppBar
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: kBackgroundColor.withOpacity(0.8),
+      elevation: 0,
+      // On desktop, we don't want the hamburger menu, so the leading icon is null
+      automaticallyImplyLeading: !isDesktop(context),
+      title: Image.asset('assets/images/iedc_logo.png', height: 40),
+      // On mobile, actions are empty. On desktop, they are populated.
+      actions: isDesktop(context)
+          ? [
+              TextButton(
+                onPressed: () => _scrollToSection(_aboutKey),
+                child: const Text('About'),
+              ),
+              TextButton(
+                onPressed: () => _scrollToSection(_eventsKey),
+                child: const Text('Events'),
+              ),
+              TextButton(
+                onPressed: () => _scrollToSection(_scheduleKey),
+                child: const Text('Schedule'),
+              ),
+              TextButton(
+                onPressed: () => _scrollToSection(_contactKey),
+                child: const Text('Contact'),
+              ),
+              const SizedBox(width: 20),
+              GradientButton(
+                text: "Register for Ideathon",
+                onPressed: () => _scrollToSection(_registrationKey),
+              ),
+              const SizedBox(width: 20),
+            ]
+          : [],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kBackgroundColor.withOpacity(0.8),
-        elevation: 0,
-        title: Image.asset('assets/images/iedc_logo.png', height: 40),
-        actions: [
-          TextButton(
-            onPressed: () => _scrollToSection(_aboutKey),
-            child: const Text('About'),
-          ),
-          TextButton(
-            onPressed: () => _scrollToSection(_eventsKey),
-            child: const Text('Events'),
-          ),
-          TextButton(
-            onPressed: () => _scrollToSection(_scheduleKey),
-            child: const Text('Schedule'),
-          ),
-          TextButton(
-            onPressed: () => _scrollToSection(_contactKey),
-            child: const Text('Contact'),
-          ),
-          const SizedBox(width: 20),
-          GradientButton(
-            text: "Register for Ideathon",
-            onPressed: () => _scrollToSection(_registrationKey),
-          ),
-          const SizedBox(width: 20),
-        ],
-      ),
+      // UPDATED: Use the new builder methods
+      appBar: _buildAppBar(),
+      drawer: isDesktop(context) ? null : _buildMobileDrawer(),
       body: Stack(
         children: [
           Container(color: kBackgroundColor),
@@ -226,6 +293,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // --- All section-building methods below remain the same ---
+  // --- No changes needed for _buildHeroSection, _buildAboutSection, etc. ---
 
   Widget _buildHeroSection() {
     final heroContent = Column(
